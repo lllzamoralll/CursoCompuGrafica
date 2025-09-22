@@ -1,162 +1,151 @@
-#include <iostream>
-#include <vector>
+#include<iostream>
+
+//#define GLEW_STATIC
+
 #include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
+
+// Shaders
 #include "Shader.h"
 
-// Tamaño de la ventana
-const GLuint WIDTH = 800, HEIGHT = 800;
+void resize(GLFWwindow* window, int width, int height);
 
-// Dimensiones de la matriz
-const int ROWS = 27;
-const int COLS = 27;
+const GLint WIDTH = 800, HEIGHT = 600;
 
-// Matriz de colores (sin modificar, como la original)
-int crashMatrix[ROWS][COLS] = {
-    {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,3,3,1,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,3,3,3,3,3,1,3,3,1,1,3,1,1,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,3,3,1,3,1,1,3,1,2,1,1,2,1,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,3,1,2,1,2,1,1,2,2,1,2,2,1,3,3,3,3,3,3,3,3},
-    {1,1,1,3,3,3,3,1,2,1,2,1,2,2,1,2,2,1,3,3,3,3,3,3,3,3,3},
-    {1,6,6,1,1,3,1,2,2,2,2,2,2,2,2,2,2,1,3,3,3,3,3,3,3,3,3},
-    {1,1,1,6,6,1,1,2,2,2,2,2,2,2,2,2,2,1,3,3,3,3,3,3,3,3,3},
-    {1,1,2,1,1,6,1,2,2,1,1,4,4,2,2,2,1,4,3,3,3,3,3,3,3,3,3},
-    {3,1,2,2,2,1,6,1,1,4,4,4,4,1,1,1,4,4,4,3,3,3,3,3,3,3,3},
-    {3,1,1,2,2,2,1,6,4,4,3,3,3,4,6,4,3,3,4,3,3,3,3,4,4,4,3},
-    {3,3,1,1,2,1,6,6,4,3,3,3,3,3,6,3,3,3,1,3,3,3,3,4,4,4,3},
-    {3,3,1,6,1,1,6,6,6,3,1,1,3,3,6,1,1,3,3,3,3,3,1,4,4,4,3},
-    {3,3,3,1,6,6,6,6,6,3,1,1,3,3,6,1,1,3,3,1,1,1,4,4,4,3,3},
-    {3,3,3,3,1,6,6,6,6,6,3,3,3,6,6,6,3,3,6,6,6,6,5,5,1,3,3},
-    {3,3,3,3,1,6,6,5,5,5,6,6,6,6,6,6,6,6,6,6,6,5,5,1,3,3,3},
-    {3,3,3,1,6,6,5,5,5,5,5,5,5,6,6,6,6,6,5,5,5,5,1,3,3,3,3},
-    {3,3,3,1,6,5,5,1,1,1,1,5,5,5,5,5,5,5,5,5,5,1,3,3,3,3,3},
-    {3,3,3,1,6,5,5,1,3,3,3,1,1,5,5,5,5,5,1,1,1,3,3,3,3,3,3},
-    {3,3,3,3,1,5,5,1,3,3,3,3,3,1,1,1,1,1,3,3,1,3,3,3,3,3,3},
-    {3,3,3,3,1,6,5,1,3,3,3,3,3,3,3,3,3,3,3,1,3,3,3,3,3,3,3},
-    {3,3,3,3,3,1,5,5,1,3,3,4,3,3,3,3,3,3,1,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,1,6,5,1,3,3,3,4,4,4,3,3,3,1,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,1,5,5,1,3,3,3,3,3,3,3,1,3,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,1,6,5,5,1,3,3,3,3,3,3,1,3,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,3,1,6,5,5,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,3,3,1,6,5,5,5,5,5,5,5,1,3,3,3,3,3,3,3,3,3},
-    {3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3}
-};
-
-// Función para obtener un color RGB según el número en la matriz
-std::vector<float> getColorFromCode(int code) {
-    switch (code) {
-    case 1: return { 0.0f, 0.0f, 0.0f }; // negro
-    case 2: return { 1.0f, 0.0f, 0.0f }; // rojo
-    case 3: return { 1.0f, 1.0f, 1.0f }; // blanco
-    case 4: return { 0.4f, 0.2f, 0.0f }; // café
-    case 5: return { 1.0f, 0.87f, 0.68f }; // beige
-    case 6: return { 1.0f, 0.5f, 0.0f }; // naranja
-    default: return { 1.0f, 1.0f, 1.0f }; // blanco por defecto
-    }
-}
-
-void resize(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
 
 int main() {
-    // Inicializar GLFW
-    if (!glfwInit()) {
-        std::cerr << "Error al inicializar GLFW" << std::endl;
-        return -1;
-    }
+	glfwInit();
+	//Verificaci�n de compatibilidad 
+	/*glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
-    // Configurar OpenGL 3.3 Core
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Dibujo de Primitivas en 2D", NULL, NULL);
+	glfwSetFramebufferSizeCallback(window, resize);
+	
+	//Verificaci�n de errores de creacion  ventana
+	if (window== NULL) 
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
 
-    // Crear ventana
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Crash Bandicoot Pixel Art", nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Error al crear la ventana" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
+		return EXIT_FAILURE;
+	}
 
-    // Inicializar GLEW
-    if (glewInit() != GLEW_OK) {
-        std::cerr << "Error al inicializar GLEW" << std::endl;
-        return -1;
-    }
+	glfwMakeContextCurrent(window);
+	glewExperimental = GL_TRUE;
 
-    glfwSetFramebufferSizeCallback(window, resize);
+	//Verificaci�n de errores de inicializaci�n de glew
 
-    // Compilar shaders
-    Shader shader("Shader/core.vs", "Shader/core.frag");
+	if (GLEW_OK != glewInit()) {
+		std::cout << "Failed to initialise GLEW" << std::endl;
+		return EXIT_FAILURE;
+	}
 
-    // Datos para los píxeles (cada cuadro un cuadrado)
-    float pixelSize = 2.0f / ROWS; // cuadrícula de -1 a 1
-    std::vector<float> vertices;
+	// Imprimimos informacin de OpenGL del sistema
+	std::cout << "> Version: " << glGetString(GL_VERSION) << std::endl;
+	std::cout << "> Vendor: " << glGetString(GL_VENDOR) << std::endl;
+	std::cout << "> Renderer: " << glGetString(GL_RENDERER) << std::endl;
+	std::cout << "> SL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLS; x++) {
-            auto color = getColorFromCode(crashMatrix[y][x]);
 
-            float xpos = -1.0f + x * pixelSize;
-            float ypos = 1.0f - y * pixelSize - pixelSize;
+	// Define las dimensiones del viewport
+	//glViewport(0, 0, screenWidth, screenHeight);
 
-            // Cada pixel = 2 triángulos (6 vértices)
-            float quad[] = {
-                xpos,         ypos + pixelSize, 0.0f,  color[0], color[1], color[2],
-                xpos,         ypos,             0.0f,  color[0], color[1], color[2],
-                xpos + pixelSize, ypos,           0.0f,  color[0], color[1], color[2],
+    Shader ourShader("Shader/core.vs", "Shader/core.frag");
 
-                xpos,         ypos + pixelSize, 0.0f,  color[0], color[1], color[2],
-                xpos + pixelSize, ypos,           0.0f,  color[0], color[1], color[2],
-                xpos + pixelSize, ypos + pixelSize, 0.0f,  color[0], color[1], color[2]
-            };
+	// Set up vertex data (and buffer(s)) and attribute pointers
+	float vertices[] = {
+		0.5f,  0.5f, 0.0f,    1.0f,0.0f,0.0f,  // top right
+		0.5f, -0.5f, 0.0f,    0.0f,1.0f,0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f,0.0f,1.0f,  // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f,1.0f,1.0f, // top left 
+	};
+	unsigned int indices[] = {  // note that we start from 0!
+		3,2,1,// second Triangle
+		0,1,3,
+		
+	};
 
-            vertices.insert(vertices.end(), std::begin(quad), std::end(quad));
-        }
-    }
 
-    // Crear VAO y VBO
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
 
-    glBindVertexArray(VAO);
+	GLuint VBO, VAO,EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+	// Enlazar  Vertex Array Object
+	glBindVertexArray(VAO);
 
-    // Posiciones
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
+	//2.- Copiamos nuestros arreglo de vertices en un buffer de vertices para que OpenGL lo use
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// 3.Copiamos nuestro arreglo de indices en  un elemento del buffer para que OpenGL lo use
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Colores
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+	// 4. Despues colocamos las caracteristicas de los vertices
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+	//Posicion
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
+	glEnableVertexAttribArray(0);
 
-    // Loop principal
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+	//Color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3*sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Fondo negro para mejor visibilidad
-        glClear(GL_COLOR_BUFFER_BIT);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        shader.Use();
+
+	glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
+
+
+	
+	while (!glfwWindowShouldClose(window))
+	{
+		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
+		glfwPollEvents();
+
+		// Render
+		// Clear the colorbuffer
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+
+		// Draw our first triangle
+        ourShader.Use();
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+
+
+        glPointSize(10);
+        glDrawArrays(GL_POINTS,0,4);	//se puede modificar para dibujar hasta 4 puntos 
+        
+        glDrawArrays(GL_LINES,0,4);
+        glDrawArrays(GL_LINE_LOOP,0,4);
+        
+        glDrawArrays(GL_TRIANGLES,0,3);
+        glDrawElements(GL_TRIANGLES, 3,GL_UNSIGNED_INT,0);
+
+        
+        
         glBindVertexArray(0);
+    
+		// Swap the screen buffers
+		glfwSwapBuffers(window);
+	}
 
-        glfwSwapBuffers(window);
-    }
 
-    // Liberar recursos
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
 
-    glfwTerminate();
-    return 0;
+	glfwTerminate();
+	return EXIT_SUCCESS;
+}
+
+void resize(GLFWwindow* window, int width, int height)
+{
+	// Set the Viewport to the size of the created window
+	glViewport(0, 0, width, height);
+	//glViewport(0, 0, screenWidth, screenHeight);
 }

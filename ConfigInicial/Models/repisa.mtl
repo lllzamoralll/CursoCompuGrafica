@@ -1,0 +1,26 @@
+# Blender 3.5.1 MTL File: 'Shelf_v3.blend'
+# www.blender.org
+
+newmtl Metal
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd texturas_repisa/FrameBaseColor_4096px.png
+map_Ns texturas_repisa/FrameRoughness_4096px.png
+map_refl texturas_repisa/FrameMetallic_4096px.png
+map_Bump -bm 1.000000 texturas_repisa/FrameNormal_4096px.png
+
+newmtl Wood
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd texturas_repisa/SelfsBaseColor_4096px.png
+map_Ns texturas_repisa/SelfsRoughness_4096px.png
+map_refl texturas_repisa/SelfsMetallic_4096px.png
+map_Bump -bm 1.000000 texturas_repisa/SelfsNormal_4096px.png
