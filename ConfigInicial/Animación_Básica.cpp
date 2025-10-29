@@ -4,6 +4,7 @@
 //Grupo 7
 //Animacion basica
 //entrega: 26/10/2025
+// 
 //practica 10
 
 #include <iostream>
